@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "de.yamayaki.leakusdeletus.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "mixins": [
+        "common.MixinConnection"
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "refmap": "leakusdeletus-refmap.json"
+}

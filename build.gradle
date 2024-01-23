@@ -1,0 +1,68 @@
+plugins {
+    id "dev.architectury.loom" version "1.3-SNAPSHOT"
+}
+
+base {
+    archivesName = project.mod_id
+}
+
+version = project.mod_version
+group = "de.yamayaki"
+
+java {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
+}
+
+loom.forge.mixinConfig("leakusdeletus.mixins.json")
+
+repositories {
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
+        name = "Parchment"
+        url = "https://maven.parchmentmc.org/"
+        mavenContent {
+            includeGroup 'org.parchmentmc.data'
+        }
+    }
+}
+
+dependencies {
+    mappings loom.officialMojangMappings()
+
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+}
+
+// make build reproducible
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: mod_description,
+            version: version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+loom.runs.all {
+    // https://github.com/SpongePowered/Mixin/wiki/Mixin-Java-System-Properties
+    vmArg("-Dmixin.debug=true")
+}
